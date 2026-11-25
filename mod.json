@@ -1,4 +1,4 @@
-{
+{{
 	"geode": "5.3.0",
 	"gd": {
 		"win": "2.2081",
@@ -11,23 +11,24 @@
 	"version": "v1.0.0",
 	"developer": "jarvisdevil",
 	"description": "Adds my version of The Map in Geometry Dash. For DindeGDPS",
-	"dependencies": {
-		"geode.node-ids": {
+	"dependencies": [
+		{
+			"id": "geode.node-ids",
 			"version": ">=1.21.1",
 			"importance": "required"
 		}
-	},
+	],
 	"resources": {
-        "spritesheets": {
-            "WorldSheet": [
-                "resources/world/*.png"
-            ]
-        },
+		"spritesheets": {
+			"WorldSheet": [
+				"resources/world/*.png"
+			]
+		},
 		"sprites": [
 			"resources/backgrounds/*.png",
 			"resources/images/*.png"
 		]
-    },
+	},
 	"tags": [
 		"content",
 		"gameplay",
@@ -35,8 +36,7 @@
 		"universal"
 	],
 	"links": {
-		"community": "https://discord.gg/EygBPh6JwW",
-		"source": "https://github.com/thejarvisdevil/TheMap"
+		"community": "https://discord.gg",
+		"source": "https://github.com"
 	}
 }
-
