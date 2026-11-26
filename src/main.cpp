@@ -1,5 +1,6 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CreatorLayer.hpp>
+#include <set>
 #include "levels.hpp"
 
 using namespace geode::prelude;
@@ -9,6 +10,7 @@ public:
     WorldLevel wlvl;
     void levelDownloadFinished(GJGameLevel* level) override {
         GameLevelManager::get()->m_levelDownloadDelegate = nullptr;
+        if (!level) return;
         level->m_creatorName = wlvl.authorName;
         level->m_accountID = wlvl.accountID;
         level->m_userID = wlvl.userID;
@@ -17,12 +19,12 @@ public:
         CCDirector::get()->pushScene(CCTransitionFade::create(0.5f, scene));
     }
     void levelDownloadFailed(int id) override {
+        GameLevelManager::get()->m_levelDownloadDelegate = nullptr;
         FLAlertLayer::create(
             "Download Failed",
             "Failed to download the level. Please try again later.", 
             "OK"
         )->show();
-        GameLevelManager::get()->m_levelDownloadDelegate = nullptr;
     }
 };
 static inline WorldLvl s_delegate;
@@ -40,10 +42,8 @@ public:
             bg->setID("world-bg");
             bg->setAnchorPoint({0.5f, 0.5f});
             bg->setPosition({ win.width / 2, win.height / 2 });
-            float scaleX = win.width / bg->getContentSize().width;
-            float scaleY = win.height / bg->getContentSize().height;
-            bg->setScaleX(scaleX);
-            bg->setScaleY(scaleY);
+            bg->setScaleX(win.width / bg->getContentSize().width);
+            bg->setScaleY(win.height / bg->getContentSize().height);
             this->addChild(bg, -1);
         }
 
@@ -209,6 +209,10 @@ public:
             }
         }
         auto glm = GameLevelManager::get();
+        if (auto existing = glm->getSavedLevel(id)) {
+            s_delegate.levelDownloadFinished(existing);
+            return;
+        }
         glm->m_levelDownloadDelegate = &s_delegate;
         glm->downloadLevel(id, false);
     }
@@ -231,10 +235,13 @@ class $modify(MyCreatorLayer, CreatorLayer) {
                 auto spr = CCSprite::create("worlds.png"_spr);
                 if (spr) {
                     if (auto oldImg = mapBtn->getNormalImage()) {
-                        spr->setScale(oldImg->getScale());
+                        float targetW = oldImg->getContentSize().width * oldImg->getScaleX();
+                        spr->setScale(targetW / spr->getContentSize().width);
                     }
                     mapBtn->setNormalImage(spr);
+                    mapBtn->updateSprite();
                 }
+                menu->updateLayout();
             }
         }
         return true;
