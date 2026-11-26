@@ -214,7 +214,7 @@ public:
             return;
         }
         glm->m_levelDownloadDelegate = &s_delegate;
-        glm->downloadLevel(id, false);
+        glm->downloadLevel(id, false, 0);
     }
 
     static CCScene* scene() {
