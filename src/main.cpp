@@ -228,28 +228,25 @@ class $modify(MyCreatorLayer, CreatorLayer) {
     bool init() {
         if (!CreatorLayer::init()) return false;
 
-        if (auto menu = this->getChildByID("creator-buttons-menu")) {
-            if (auto mapBtn = menu->getChildByID("the-map-button")) {
-                auto spr = CCSprite::create("worlds.png"_spr);
-                if (!spr) {
-                    spr = CCSprite::createWithSpriteFrameName("GJ_mapBtn_001.png");
-                }
-                
-                float scale = mapBtn->getContentSize().width / spr->getContentSize().width;
-                spr->setScale(scale);
+        auto menu = this->getChildByID("creator-buttons-menu");
+        if (!menu) return true;
 
-                auto worldsBtn = CCMenuItemSpriteExtra::create(
-                    spr, nullptr, this, menu_selector(MyCreatorLayer::onWorldsBtn)
-                );
-                worldsBtn->setID("worlds-button"_spr);
-                worldsBtn->setPosition(mapBtn->getPosition());
-                worldsBtn->setZOrder(mapBtn->getZOrder());
+        auto mapBtn = static_cast<CCMenuItemSpriteExtra*>(menu->getChildByID("the-map-button"));
+        if (mapBtn) {
+            mapBtn->setTarget(this, menu_selector(MyCreatorLayer::onWorldsBtn));
 
-                mapBtn->setVisible(false);
-                menu->insertAfter(worldsBtn, mapBtn);
-                menu->updateLayout();
+            auto spr = CCSprite::create("worlds.png"_spr);
+            if (spr) {
+                float oldW = mapBtn->getContentSize().width;
+                float oldH = mapBtn->getContentSize().height;
+                spr->setScale(oldW / spr->getContentSize().width);
+                spr->setPosition({ oldW / 2.f, oldH / 2.f });
+
+                mapBtn->removeAllChildren();
+                mapBtn->addChild(spr);
             }
         }
+
         return true;
     }
 
