@@ -1,4 +1,5 @@
 #include <Geode/Geode.hpp>
+#include <Geode/modify/CreatorLayer.hpp>
 #include "levels.hpp"
 
 using namespace geode::prelude;
@@ -209,39 +210,37 @@ public:
         }
         auto glm = GameLevelManager::get();
         glm->m_levelDownloadDelegate = &s_delegate;
-        glm->downloadLevel(id, false, 0);
+        glm->downloadLevel(id, false);
     }
 
-    static cocos2d::CCScene* scene() {
-        auto scene = cocos2d::CCScene::create();
+    static CCScene* scene() {
+        auto scene = CCScene::create();
         scene->addChild(WorldsLayer::create());
         return scene;
     }
 };
 
-#include <Geode/modify/CreatorLayer.hpp>
-class $modify(WorldCreatorLayer, CreatorLayer) {
+class $modify(MyCreatorLayer, CreatorLayer) {
     bool init() {
         if (!CreatorLayer::init()) return false;
 
         if (auto menu = this->getChildByID("creator-buttons-menu")) {
-            auto spr = CCSprite::createWithSpriteFrameName("GJ_worldBtn_001.png"_spr);
-            if (!spr) {
-                spr = CCSprite::createWithSpriteFrameName("GJ_mapBtn_001.png");
+            if (auto mapBtn = static_cast<CCMenuItemSpriteExtra*>(menu->getChildByID("the-map-button"))) {
+                mapBtn->setTarget(this, menu_selector(MyCreatorLayer::onWorldsBtn));
+                
+                auto spr = CCSprite::create("worlds.png"_spr);
+                if (spr) {
+                    if (auto oldImg = mapBtn->getNormalImage()) {
+                        spr->setScale(oldImg->getScale());
+                    }
+                    mapBtn->setNormalImage(spr);
+                }
             }
-            auto btn = CCMenuItemSpriteExtra::create(
-                spr, nullptr, this, menu_selector(WorldCreatorLayer::onWorldMap)
-            );
-            btn->setID("world-map-btn"_spr);
-            menu->addChild(btn);
-            menu->updateLayout();
         }
         return true;
     }
 
-    void onWorldMap(CCObject*) {
-        CCDirector::get()->replaceScene(
-            CCTransitionFade::create(0.5f, WorldsLayer::scene())
-        );
+    void onWorldsBtn(CCObject*) {
+        CCDirector::get()->replaceScene(CCTransitionFade::create(0.5f, WorldsLayer::scene()));
     }
 };
