@@ -229,18 +229,24 @@ class $modify(MyCreatorLayer, CreatorLayer) {
         if (!CreatorLayer::init()) return false;
 
         if (auto menu = this->getChildByID("creator-buttons-menu")) {
-            if (auto mapBtn = static_cast<CCMenuItemSpriteExtra*>(menu->getChildByID("the-map-button"))) {
-                mapBtn->setTarget(this, menu_selector(MyCreatorLayer::onWorldsBtn));
-                
+            if (auto mapBtn = menu->getChildByID("the-map-button")) {
                 auto spr = CCSprite::create("worlds.png"_spr);
-                if (spr) {
-                    if (auto oldImg = mapBtn->getNormalImage()) {
-                        float targetW = oldImg->getContentSize().width * oldImg->getScaleX();
-                        spr->setScale(targetW / spr->getContentSize().width);
-                    }
-                    mapBtn->setNormalImage(spr);
-                    mapBtn->updateSprite();
+                if (!spr) {
+                    spr = CCSprite::createWithSpriteFrameName("GJ_mapBtn_001.png");
                 }
+                
+                float scale = mapBtn->getContentSize().width / spr->getContentSize().width;
+                spr->setScale(scale);
+
+                auto worldsBtn = CCMenuItemSpriteExtra::create(
+                    spr, nullptr, this, menu_selector(MyCreatorLayer::onWorldsBtn)
+                );
+                worldsBtn->setID("worlds-button"_spr);
+                worldsBtn->setPosition(mapBtn->getPosition());
+                worldsBtn->setZOrder(mapBtn->getZOrder());
+
+                mapBtn->setVisible(false);
+                menu->insertAfter(worldsBtn, mapBtn);
                 menu->updateLayout();
             }
         }
